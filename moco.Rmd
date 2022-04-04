@@ -13,20 +13,20 @@ library(tigris)
 census <- read.csv("tractdemographics.csv")
 ```
 
-```{r}
+```{r, message = FALSE}
 options(tigris_year = 2021)
 ```
 
-```{r}
+```{r, message = FALSE}
 address <- address_ranges(24, 031)
 ```
-```{r}
+```{r, message = FALSE}
 water <- area_water(24, 031)
 ```
-```{r}
+```{r, message = FALSE}
 roads <- primary_roads(2021)
 ```
-```{r}
+```{r, message = FALSE}
 mocotract <- tracts(24, 031)
 ```
 
