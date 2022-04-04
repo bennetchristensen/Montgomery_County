@@ -1,0 +1,87 @@
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error=TRUE)
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+library(sf)
+library(spdep)
+library(tigris)
+```
+
+```{r}
+census <- read.csv("tractdemographics.csv")
+```
+
+```{r}
+options(tigris_year = 2021)
+```
+
+```{r}
+address <- address_ranges(24, 031)
+```
+```{r}
+water <- area_water(24, 031)
+```
+```{r}
+roads <- primary_roads(2021)
+```
+```{r}
+mocotract <- tracts(24, 031)
+```
+
+```{r}
+census <- census %>%
+  rename(NAME= ï..Tract.Code, IncomeLevel= Tract.Income.Level, PercentOverTheMedian= Tract.Median.Family.Income..)
+```
+```{r}
+vector <- census %>%
+  select(NAME) 
+geogvector <- mocotract %>%
+  select(NAME, geometry)
+geogvector$NAME=as.numeric(geogvector$NAME)
+vector1 <-vector$NAME
+vector2 <-geogvector$NAME
+matched<-cbind(match(vector2, vector1))
+matched2 <-cbind(match(vector1, vector2))
+geogvector <- geogvector %>%
+  cbind(matched) %>%
+  filter(matched!='na') %>%
+  select(NAME, geometry)
+
+geogvector <- geogvector[order(geogvector$NAME),]
+
+censusmix <- census %>%
+  cbind(matched2) %>%
+  filter(matched2 !='na') %>%
+  cbind(geogvector) 
+
+```
+
+```{r}
+censusmix<-censusmix[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 22)]
+```
+
+
+```{r}
+censusmix%>%
+  ggplot() +
+  geom_sf(aes(geometry=geometry, fill=IncomeLevel)) +
+  geom_sf(data=water, color="#D6F3FF", fill="#D6F3FF") +
+  theme_classic()
+```
+```{r}
+censusmix%>%
+  ggplot() +
+  geom_sf(aes(geometry=geometry, fill=Vacant.Units ), color = "#8f98aa") +
+  geom_sf(data=water, color="#D6F3FF", fill="#D6F3FF") +
+  theme_classic()
+```
+
+```{r}
+censusmix%>%
+  ggplot() +
+  geom_sf(aes(geometry=geometry, fill=Tract.Population ), color = "#8f98aa") +
+  geom_sf(data=water, color="#D6F3FF", fill="#D6F3FF") +
+  theme_classic()
+```
